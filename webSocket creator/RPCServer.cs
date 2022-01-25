@@ -120,7 +120,7 @@ namespace webSocket_creator
             {
                 udp.EnableBroadcast = true;
                 udp.Send(sendBytes, sendBytes.Length, groupEP);
-                Thread.Sleep(10000);
+                Thread.Sleep(1000);
             }
             udp.Close();
 
@@ -307,38 +307,7 @@ namespace webSocket_creator
             }
         }
 
-        public static async Task Notify(string rpcMethod, string rpcParams)
-        {
-            JsonNotification request = new JsonNotification
-            {
-                Method = rpcMethod,
-                Params = JsonConvert.DeserializeObject(rpcParams),
-            };
 
-            string notification = JsonConvert.SerializeObject(request);
-            Console.WriteLine($"NOTIFICATION: {notification}");
-
-            foreach (var client in Clients)
-            {
-                ArraySegment<byte> outputBuffer =
-                    new ArraySegment<byte>(Encoding.UTF8.GetBytes(notification));
-
-                var context = client.Value.Item1;
-                if (context.WebSocket.State == WebSocketState.Open)
-                {
-                    try
-                    {
-                        await client.Value.Item1.WebSocket.SendAsync(outputBuffer, WebSocketMessageType.Text, true,
-                            CancellationToken.None);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("Got Error while trying to notify client", ex);
-                    }
-                }
-                else Console.WriteLine("Trying to notify client with unopened socket, check logic");
-            }
-        }
 
         public void Dispose()
         {
